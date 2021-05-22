@@ -1,21 +1,29 @@
 package structs
 
-const BLOCK_SIZE int = 25
+import (
+	"crypto/sha256"
+	"fmt"
+	"time"
+)
+
+const DEFAULT_BLOCK_SIZE int = 25
 
 type ProposedTransaction struct {
-	Timestamp string `json:"timestamp"`
-	Content   string `json:"content"`
+	Content string `json:"content"`
 }
 
 type Transaction struct {
 	ProposedTransaction
 
-	// BlockHash+TxNumber uniquely identifies a transaction.
-	BlockHash string `json:"blockHash"`
-	TxNumber  string `json:"txNumber"`
+	// BlockNum+TxNumber uniquely identifies a transaction.
+	BlockNum int `json:"blockNum"`
+	TxNumber int `json:"txNumber"`
 }
 
 type Block struct {
+
+	// Uniquely identifies a block in the blockchain.
+	BlockNum int
 
 	// Equal to the timestamp of the *last* transaction in TxList
 	Timestamp string `json:"timestamp"`
@@ -23,11 +31,33 @@ type Block struct {
 	// SHA-256 hash.
 	PreviousHash string `json:"previousHash"`
 
-	// SHA-256 hash of the entire block (Timestamp included).
-	// Uniquely identifies a block in the blockchain.
-	// This is used to cache the block in-memory for quick response
-	// to getTransaction() and getBlock()
+	// SHA-256 hash of the entire block.
 	Hash string `json:"hash"`
 
-	TxList [BLOCK_SIZE]Transaction
+	TxList [DEFAULT_BLOCK_SIZE]Transaction
+}
+
+// transactions need to be ordered in the same way they will be packed into the
+// block
+func NewBlock(blockNum int, prevHash string, transactions [DEFAULT_BLOCK_SIZE]Transaction) (*Block, error) {
+
+	b := Block{
+		BlockNum:     blockNum,
+		Timestamp:    time.Now().String(),
+		PreviousHash: prevHash,
+		Hash:         "",
+		TxList:       transactions,
+	}
+
+	hash := AsSha256(b)
+	b.Hash = hash
+
+	return &b, nil
+}
+
+func AsSha256(o interface{}) string {
+	h := sha256.New()
+	h.Write([]byte(fmt.Sprintf("%v", o)))
+
+	return fmt.Sprintf("%x", h.Sum(nil))
 }

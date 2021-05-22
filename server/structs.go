@@ -1,4 +1,4 @@
-package main
+package server
 
 import "github.com/lyulka/trivial-ledger/structs"
 
@@ -21,10 +21,3 @@ type GetBlockRequest struct {
 }
 
 type GetBlockResponse structs.Block
-
-// Why this is necessary is complicated. It is necessary for the correctness
-// of TLedger's protocol and is inspired by cumulative acknowledgement in network protocols.
-type transactionEntry struct {
-	structs.Transaction
-	isCommitted bool
-}
