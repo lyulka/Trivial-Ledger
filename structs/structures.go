@@ -34,7 +34,7 @@ type Block struct {
 	// SHA-256 hash of the entire block.
 	Hash string `json:"hash"`
 
-	TxList [DEFAULT_BLOCK_SIZE]Transaction
+	Transactions [DEFAULT_BLOCK_SIZE]Transaction
 }
 
 // transactions need to be ordered in the same way they will be packed into the
@@ -46,7 +46,7 @@ func NewBlock(blockNum int, prevHash string, transactions [DEFAULT_BLOCK_SIZE]Tr
 		Timestamp:    time.Now().String(),
 		PreviousHash: prevHash,
 		Hash:         "",
-		TxList:       transactions,
+		Transactions: transactions,
 	}
 
 	hash := AsSha256(b)

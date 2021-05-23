@@ -18,12 +18,16 @@ type BlockCache map[int]st.Block
 // Only blocks that have been 'committed' are supposed to be added into BlockCache
 func (bc BlockCache) PopulateWithBlocks(client cv3.Client, start int, end int) error {
 
+	if start == end {
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_DIAL_TIMEOUT)
 
 	resp, err := client.Get(
 		ctx,
-		fmt.Sprintf("%s%d", TLEDGER_PREFIX, start*st.DEFAULT_BLOCK_SIZE),                    // Start key
-		cv3.WithRange(fmt.Sprintf("%s%d", TLEDGER_PREFIX, (end-1)*st.DEFAULT_BLOCK_SIZE+1)), // End key
+		fmt.Sprintf("%s%s", PREFIX, intToBinary(int64(start*st.DEFAULT_BLOCK_SIZE))),              // Start key
+		cv3.WithRange(fmt.Sprintf("%s%s", PREFIX, intToBinary(int64(end*st.DEFAULT_BLOCK_SIZE)))), // End key
 		cv3.WithSort(cv3.SortByKey, cv3.SortAscend))
 
 	cancel()
@@ -73,13 +77,17 @@ func (bc BlockCache) PopulateWithBlocks(client cv3.Client, start int, end int) e
 		}
 
 		if _, ok := bc[blockNum]; ok {
-			fmt.Printf("PopulateWithBlocks: blockNum: %d is already in cache. Indicates programming error", blockNum)
+			fmt.Printf("PopulateWithBlocks: blockNum: %d is already in cache\n", blockNum)
 		}
 
 		bc[blockNum] = *block
 	}
 
 	return nil
+}
+
+func (bc BlockCache) latestBlockNumInCache() int {
+	return len(bc) - 1
 }
 
 // TODO: figure out why types are not allowed for arguments
