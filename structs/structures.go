@@ -24,7 +24,7 @@ type Transaction struct {
 type Block struct {
 
 	// Uniquely identifies a block in the blockchain.
-	BlockNum int
+	BlockNum int `json:"blockNum"`
 
 	// Equal to the timestamp of the *last* transaction in TxList
 	Timestamp string `json:"timestamp"`

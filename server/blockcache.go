@@ -59,7 +59,7 @@ func (bc BlockCache) PopulateWithBlocks(client cv3.Client, start int, end int) e
 		// Extract values into an array of transactions
 		// transactions := extractTransactions(resp.Kvs, blocksAdded*st.DEFAULT_BLOCK_SIZE)
 		var transactions [st.DEFAULT_BLOCK_SIZE]st.Transaction
-		for i := blocksAdded * st.DEFAULT_BLOCK_SIZE; i < st.DEFAULT_BLOCK_SIZE; i += 1 {
+		for i := blocksAdded * st.DEFAULT_BLOCK_SIZE; i < (blocksAdded+1)*st.DEFAULT_BLOCK_SIZE; i += 1 {
 			txBytes := resp.Kvs[i].Value
 
 			transaction := st.Transaction{}
@@ -68,7 +68,7 @@ func (bc BlockCache) PopulateWithBlocks(client cv3.Client, start int, end int) e
 			if err != nil {
 				return err
 			}
-			transactions[i] = transaction
+			transactions[i%st.DEFAULT_BLOCK_SIZE] = transaction
 		}
 
 		block, err := st.NewBlock(blockNum, prevHash, transactions)
@@ -81,6 +81,7 @@ func (bc BlockCache) PopulateWithBlocks(client cv3.Client, start int, end int) e
 		}
 
 		bc[blockNum] = *block
+		blocksAdded += 1
 	}
 
 	return nil
