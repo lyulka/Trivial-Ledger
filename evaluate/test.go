@@ -22,13 +22,7 @@ const SERVER2_ENDPOINT = "localhost:9091"
 func main() {
 
 	defer func() {
-		fmt.Println(color.Green + "[Sending SIGINT to tledger-server processes]" + color.Reset)
-		err := exec.Command("killall", "-2", "tledger-server")
-		err = exec.Command("killall", "-2", "tledger-server")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		fmt.Println(color.Red + "Please `killall -2 tledger-server` yourself" + color.Reset)
 	}()
 
 	fmt.Println(color.Red + "MAKE SURE YOU HAVE INSTALLED tledger-server by running ../install.sh" + color.Reset)

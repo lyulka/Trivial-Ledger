@@ -105,22 +105,27 @@ func (s *Server) BringBlockCacheAndLatestTxNumUpToDate() error {
 func (s *Server) Teardown() {
 	s.etcdClient.Close()
 
-	outDir := fmt.Sprintf("/logs" + TLEDGER_SERVER_ENDPOINT)
-	timeStamp := time.Now().String()
-	fmt.Println("RBDNS: SIGINT received. Printing BlockCache into " + outDir + "/" + timeStamp)
+	outDir := fmt.Sprintf("/tmp/tledger/" + TLEDGER_SERVER_ENDPOINT)
+	timeStamp := strconv.Itoa(int(time.Now().UnixNano()))
+	fmt.Println("TLedger: SIGINT received. Printing BlockCache into " + outDir + "/" + timeStamp)
+
 	if _, err := os.Stat(outDir); os.IsNotExist(err) {
-		os.Mkdir(outDir, 0755)
+		err = os.MkdirAll(outDir, 0755)
+		if err != nil {
+			fmt.Println("TLedger: Failed to create directory in /tmp")
+			fmt.Println(err)
+		}
 	}
 
-	outFile, err := os.Create(outDir + "/" + timeStamp)
+	outFile, err := os.Create(outDir + "/" + timeStamp + ".txt")
 	if err != nil {
-		fmt.Println("RBDNS: Failed to log results.")
+		fmt.Println("TLedger: Failed to log results.")
 		fmt.Println(err)
 	}
 	outFile.Write([]byte(fmt.Sprintf("%v", s.blockCache)))
 	outFile.Close()
 
-	fmt.Println("RBDNS: Tearing down server. Goodbye!")
+	fmt.Println("TLedger: Tearing down server. Goodbye!")
 }
 
 func (s *Server) proposeTransaction(propTx st.ProposedTransaction) (blockNum int, txNumber int, err error) {
@@ -140,6 +145,7 @@ func (s *Server) proposeTransaction(propTx st.ProposedTransaction) (blockNum int
 			ProposedTransaction: propTx,
 			BlockNum:            blockNum,
 			TxNumber:            txNumber,
+			Timestamp:           time.Now().String(),
 		})
 		value := string(valueBytes)
 

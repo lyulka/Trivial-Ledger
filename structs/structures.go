@@ -3,7 +3,6 @@ package structs
 import (
 	"crypto/sha256"
 	"fmt"
-	"time"
 )
 
 const DEFAULT_BLOCK_SIZE int = 25
@@ -14,6 +13,8 @@ type ProposedTransaction struct {
 
 type Transaction struct {
 	ProposedTransaction
+
+	Timestamp string `json:"timestamp"`
 
 	// BlockNum+TxNumber uniquely identifies a transaction.
 	BlockNum int `json:"blockNum"`
@@ -43,7 +44,7 @@ func NewBlock(blockNum int, prevHash string, transactions [DEFAULT_BLOCK_SIZE]Tr
 
 	b := Block{
 		BlockNum:     blockNum,
-		Timestamp:    time.Now().String(),
+		Timestamp:    transactions[len(transactions)-1].Timestamp,
 		PreviousHash: prevHash,
 		Hash:         "",
 		Transactions: transactions,
